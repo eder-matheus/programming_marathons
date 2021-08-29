@@ -6,7 +6,8 @@
 const char FUSION = 'F';
 const char QUERY = 'C';
 
-void buildBanks(int banks_count, std::vector<int>& banks, std::vector<int>& bank_size) {
+void buildBanks(int banks_count, std::vector<int> &banks,
+                std::vector<int> &bank_size) {
   banks.clear();
   bank_size.clear();
 
@@ -18,7 +19,7 @@ void buildBanks(int banks_count, std::vector<int>& banks, std::vector<int>& bank
   }
 }
 
-int searchBank(int bank, std::vector<int>& banks) {
+int searchBank(int bank, std::vector<int> &banks) {
   if (bank != banks[bank]) {
     banks[bank] = searchBank(banks[bank], banks);
   }
@@ -26,7 +27,8 @@ int searchBank(int bank, std::vector<int>& banks) {
   return banks[bank];
 }
 
-void joinBanks(int b0, int b1, std::vector<int>& banks, std::vector<int>& bank_size) {
+void joinBanks(int b0, int b1, std::vector<int> &banks,
+               std::vector<int> &bank_size) {
   int top0 = searchBank(b0, banks);
   int top1 = searchBank(b1, banks);
 
