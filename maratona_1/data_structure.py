@@ -2,12 +2,11 @@
 import sys
 from queue import Queue, LifoQueue, PriorityQueue
 
-pilha: LifoQueue = LifoQueue()
-fila: Queue = Queue()
-prioridade: PriorityQueue = PriorityQueue()
-
 while(True):
     try:
+        pilha: LifoQueue = LifoQueue()
+        fila: Queue = Queue()
+        prioridade: PriorityQueue = PriorityQueue()
         n = int(input())
         is_pilha = True
         is_fila = True
