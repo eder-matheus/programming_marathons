@@ -9,23 +9,36 @@ const int CHANGE = 1;
 const bool MIN = true;
 const bool MAX = false;
 
-void buildSegTree(std::vector<int> &seg_tree, const std::vector<int> &vec,
-                  int node, int begin, int end, bool min) {
+// add struct with cheaper and most expensive price
+// to avoid have two segment trees --> less runtime
+struct Price {
+  int cheap;
+  int expensive;
+};
+
+void buildSegTree(std::vector<Price> &seg_tree, const std::vector<int> &vec,
+                  int node, int begin, int end) {
   if (begin == end) {
-    seg_tree[node] = vec[end];
+    seg_tree[node].cheap = vec[end];
+    seg_tree[node].expensive = vec[end];
   } else {
     int middle = (begin + end) / 2;
-    buildSegTree(seg_tree, vec, 2 * node, begin, middle, min);
-    buildSegTree(seg_tree, vec, 2 * node + 1, middle + 1, end, min);
-    seg_tree[node] = min ? std::min(seg_tree[2 * node], seg_tree[2 * node + 1])
-                         : std::max(seg_tree[2 * node], seg_tree[2 * node + 1]);
+    buildSegTree(seg_tree, vec, 2 * node, begin, middle);
+    buildSegTree(seg_tree, vec, 2 * node + 1, middle + 1, end);
+    seg_tree[node].cheap =
+        std::min(seg_tree[2 * node].cheap, seg_tree[2 * node + 1].cheap);
+
+    seg_tree[node].expensive = std::max(seg_tree[2 * node].expensive,
+                                        seg_tree[2 * node + 1].expensive);
   }
 }
 
-int getMinMax(std::vector<int> &seg_tree, int first, int last, int node,
-              int begin, int end, bool min) {
+Price getMinMax(std::vector<Price> &seg_tree, int first, int last, int node,
+                int begin, int end) {
   if (first > last) {
-    int min_max = min ? std::numeric_limits<int>::max() : -1;
+    Price min_max;
+    min_max.cheap = std::numeric_limits<int>::max();
+    min_max.expensive = -1;
     return min_max;
   }
 
@@ -34,32 +47,34 @@ int getMinMax(std::vector<int> &seg_tree, int first, int last, int node,
   }
 
   int middle = (begin + end) / 2;
-  int min_max =
-      min ? std::min(getMinMax(seg_tree, first, std::min(middle, last),
-                               2 * node, begin, middle, min),
-                     getMinMax(seg_tree, std::max(first, middle + 1), last,
-                               2 * node + 1, middle + 1, end, min))
-          : std::max(getMinMax(seg_tree, first, std::min(middle, last),
-                               2 * node, begin, middle, min),
-                     getMinMax(seg_tree, std::max(first, middle + 1), last,
-                               2 * node + 1, middle + 1, end, min));
+  Price min_max_left = getMinMax(seg_tree, first, std::min(middle, last), 2 * node,
+                             begin, middle);
+  Price min_max_right = getMinMax(seg_tree, std::max(first, middle + 1), last,
+                             2 * node + 1, middle + 1, end);
+
+  Price min_max;
+  min_max.cheap = std::min(min_max_left.cheap, min_max_right.cheap);
+  min_max.expensive = std::max(min_max_left.expensive, min_max_right.expensive);
+
   return min_max;
 }
 
-void updateSegTree(std::vector<int> &seg_tree, int position, int value,
-                   int node, int begin, int end, bool min) {
+void updateSegTree(std::vector<Price> &seg_tree, int position, int value,
+                   int node, int begin, int end) {
   if (begin == end) {
-    seg_tree[node] = value;
+    seg_tree[node].cheap = value;
+    seg_tree[node].expensive = value;
   } else {
     int middle = (begin + end) / 2;
     if (position <= middle) {
-      updateSegTree(seg_tree, position, value, 2 * node, begin, middle, min);
+      updateSegTree(seg_tree, position, value, 2 * node, begin, middle);
     } else {
-      updateSegTree(seg_tree, position, value, 2 * node + 1, middle + 1, end,
-                    min);
+      updateSegTree(seg_tree, position, value, 2 * node + 1, middle + 1, end);
     }
-    seg_tree[node] = min ? std::min(seg_tree[2 * node], seg_tree[2 * node + 1])
-                         : std::max(seg_tree[2 * node], seg_tree[2 * node + 1]);
+    seg_tree[node].cheap =
+        std::min(seg_tree[2 * node].cheap, seg_tree[2 * node + 1].cheap);
+    seg_tree[node].expensive = std::max(seg_tree[2 * node].expensive,
+                                        seg_tree[2 * node + 1].expensive);
   }
 }
 
@@ -70,14 +85,12 @@ int main() {
 
   while (std::cin >> stores_cnt) {
     std::vector<int> stores(stores_cnt);
-    std::vector<int> min_stores_tree(4 * stores_cnt);
-    std::vector<int> max_stores_tree(4 * stores_cnt);
+    std::vector<Price> stores_tree(4 * stores_cnt);
     for (int i = 0; i < stores_cnt; i++) {
       std::cin >> stores[i];
     }
 
-    buildSegTree(min_stores_tree, stores, 1, 0, stores_cnt - 1, MIN);
-    buildSegTree(max_stores_tree, stores, 1, 0, stores_cnt - 1, MAX);
+    buildSegTree(stores_tree, stores, 1, 0, stores_cnt - 1);
 
     int op_count;
     std::cin >> op_count;
@@ -88,23 +101,15 @@ int main() {
         int store, new_value;
         std::cin >> store >> new_value;
         store--;
-        updateSegTree(min_stores_tree, store, new_value, 1, 0, stores_cnt - 1,
-                      MIN);
-        updateSegTree(max_stores_tree, store, new_value, 1, 0, stores_cnt - 1,
-                      MAX);
-      } else if (op == QUERY) {
+        updateSegTree(stores_tree, store, new_value, 1, 0, stores_cnt - 1);
+      } else {
         int first, last;
         std::cin >> first >> last;
         first--;
         last--;
-        int min =
-            getMinMax(min_stores_tree, first, last, 1, 0, stores_cnt - 1, MIN);
-        int max =
-            getMinMax(max_stores_tree, first, last, 1, 0, stores_cnt - 1, MAX);
-        std::cout << max - min << "\n";
-      } else {
-        std::cout << "[ERROR] Invalid operation\n";
-        exit(1);
+        Price min_max =
+            getMinMax(stores_tree, first, last, 1, 0, stores_cnt - 1);
+        std::cout << min_max.expensive - min_max.cheap << "\n";
       }
     }
   }
