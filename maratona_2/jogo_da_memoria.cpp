@@ -20,11 +20,13 @@ int dfs(int vertex, const std::vector<std::vector<int>> &graph,
   return dist;
 }
 
-int bfsForDistance(int source, int target, const std::vector<std::vector<int>> &graph,
+int bfsForDistance(int source, const std::vector<std::vector<int>> &graph,
                    std::vector<int> &cards) {
   std::list<int> expand;
   std::vector<int> expanded(cards.size(), 0);
   std::vector<int> distance(graph.size(), 0);
+  int card = cards[source];
+  int target;
 
   expand.push_back(source);
   expanded[source] = 1;
@@ -56,14 +58,11 @@ int main() {
   int num_cards;
   std::cin >> num_cards;
 
-  std::vector<vector<int>> cards(num_cards/2);
+  std::vector<int> cards(num_cards);
   std::vector<std::vector<int>> graph(num_cards);
 
   for (int i = 0; i < num_cards; i++) {
-    int c;
-    std::cin >> c;
-    c--;
-    cards[c].push_back(i);
+    std::cin >> cards[i];
   }
 
   for (int i = 0; i < num_cards - 1; i++) {
@@ -76,7 +75,7 @@ int main() {
   }
 
   int points = 0;
-  for (int i = 0; i < cards.size(); i++) {
+  for (int i = 1; i <= num_cards/2; i++) {
     std::vector<int>::iterator it = std::find(cards.begin(), cards.end(), i);
     int source = it - cards.begin();
     points += bfsForDistance(source, graph, cards);
