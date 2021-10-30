@@ -2,6 +2,14 @@
   "files.associations": {
     "iostream": "cpp",
     "ostream": "cpp",
-    "list": "cpp"
-  }
+    "list": "cpp",
+    "map": "cpp",
+    "*.tcc": "cpp",
+    "iosfwd": "cpp",
+    "vector": "cpp",
+    "iomanip": "cpp",
+    "random": "cpp",
+    "cmath": "cpp"
+  },
+  "C_Cpp.errorSquiggles": "Disabled"
 }

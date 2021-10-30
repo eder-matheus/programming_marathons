@@ -75,7 +75,7 @@ int main() {
         
         int res = kruskal(n);
 
-        cout << total-res << "\n";
+        cout << (total-res) << "\n";
     }
 
     return 0;
