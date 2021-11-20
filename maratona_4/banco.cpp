@@ -1,24 +1,25 @@
-// Wrong Answer, mas pelos testes ta tudo correto.
+// fila do banco - uri 1537
 
-#include <stdio.h>
 #include <iostream>
-#include <math.h>
-#include <stdlib.h>
-
-using namespace std;
 
 int main() {
-	unsigned long fatorial[100002];
-	int n;
-	
-	fatorial[3] = 1;
-	for (int i = 4; i <= 100000; i++)
-		fatorial[i] = (i*fatorial[i-1]) % 1000000009;
-	
-	while (cin >> n){
-        if (!n) break;
-        else cout << fatorial[n] << endl;
+  std::ios_base::sync_with_stdio(false);
+  std::cin.tie(NULL);
+
+  unsigned long long fatorial[100002];
+  int n;
+
+  fatorial[3] = 1;
+  for (int i = 4; i <= 100000; i++)
+    fatorial[i] = (i * fatorial[i - 1]) % 1000000009;
+
+  while (std::cin >> n) {
+    if (n == 0) {
+      break;
     }
 
-    return 0;
+    std::cout << fatorial[n] << "\n";
+  }
+
+  return 0;
 }
